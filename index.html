@@ -1,9 +1,11 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <title>Holi</title>
-    <script src = "js/babylon.2.1.debug.js"></script>
+    <meta charset="utf-8" />
+    <title>Holi Mundi</title>
+    <script src="js/babylon.js"></script>
+    <script src="js/babylon.d.ts"></script>
+
     <style>
         html, body {
             overflow: hidden;
@@ -18,32 +20,63 @@
             height: 100%;
             touch-action: none;
         }
+
     </style>
 </head>
 <body>
-    <canvas id = "render canvas"></canvas>
-    <script src="js/app.js"></script>
+    <canvas id="renderCanvas"></canvas>
+    <!--<script src="js/app.js"></script>-->
     <script>
         if (BABYLON.Engine.isSupported()) {
-            var canvas = document.getElementById('renderCanvas');
-            var engine = BABYLON.Engine(canvas, true);
 
-            var scene = BABYLON.Scene(engine);
-            var camera = new BABYLON.ArcRotateCamera("camera", 0, Math.PI / 2, 13, BABYLON.Vector3.Zero(), scene);
-            camera.attachControl(canvas, false);
+            var canvas = document.getElementById("renderCanvas");
 
-            var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+            var knot;
 
-            var knot = BABYLON.Mesh.CreateTorusKnot("mesh", 2, 0.5, 128, 64, 2, 50, scene);
+            var createScene = function () {
 
-            var material = BABYLON.StandardMaterial("mat", scene);
-            knot.material = material;
-            material.diffuseColor = new BABYLON.Color3(1, 0, 1);
+                var scene = new BABYLON.Scene(engine);
 
-            var renderLoop = function () {
-                scene.render();
+                var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+
+                camera.setTarget(BABYLON.Vector3.Zero());
+
+                camera.attachControl(canvas, true);
+
+                var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+                light.intensity = 0.7;
+
+                knot = BABYLON.Mesh.CreateTorusKnot("mesh", 2, 0.5, 128, 64, 2, 50, scene);
+
+                var material = new BABYLON.StandardMaterial("mat", scene);
+                knot.material = material;
+                material.diffuseColor = new BABYLON.Color3(1.5, 0, 0);
+
+                var alpha = 0;
+                knot.scaling.y = 1.5;
+
+                scene.registerBeforeRender(function () {
+                    knot.rotation.y = alpha;
+                    alpha += 0.03;
+                });
+
+                return scene;
             };
-            engine.runRenderLoop(renderLoop);
+
+            var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+            var scene = createScene();
+
+            engine.runRenderLoop(function () {
+                if (scene) {
+                    scene.render();
+                }
+            });
+
+            // Resize
+            window.addEventListener("resize", function () {
+                engine.resize();
+            });
         };
     </script>
 </body>
